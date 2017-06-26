@@ -9,7 +9,11 @@ mongoose.connect('mongodb://localhost/snapcat');
 
 const Cat = mongoose.model(
   'Cat',            // 1st argument -> Name of the model
-  { name: String }  // 2nd argument -> Schema object of the model
+  {                 // 2nd argument -> Schema object of the model
+    name: String,
+    breed: String,
+    age: Number
+  }
 );
 
 
@@ -22,7 +26,14 @@ const Cat = mongoose.model(
 // C of CRUD (create)
 
 // db.cats.insertOne({ name: 'Armani '})
-const myKitty = new Cat({ name: 'Armani' });
+const myKitty = new Cat({
+  name: 'Armani',
+  breed: 'Tuxedo Cat',
+  age: 14,
+
+  // this field is ignored because it's not in the SCHEMA
+  favoriteToy: 'Water Glass'
+});
 myKitty.save((theError) => {
   // this CALLBACK is called when the save is finished!
 
@@ -37,14 +48,74 @@ myKitty.save((theError) => {
 
 
 // db.cats.insertOne({ name: 'Nala' })
-Cat.create({ name: 'Nala' }, (theError) => {
-  // this CALLBACK is called when the save is finished!
+Cat.create(
+  {
+    name: 'Nala',
+    breed: 'Part Lion',
+    age: 1,
 
-  if (theError) {
-    console.log('SHIT! Could not save Nala (not a life or death thing).');
+    // this field is ignored because it's not in the SCHEMA
+    personality: 'Sassy'
+  },
+
+  (theError) => {
+    // this CALLBACK is called when the save is finished!
+
+    if (theError) {
+      console.log('SHIT! Could not save Nala (not a life or death thing).');
+    }
+
+    else {
+      console.log('YES! Saved Nala.');
+    }
+  }
+);
+
+
+
+// R of CRUD (read or retrieve)
+
+// db.cats.find()
+Cat.find((err, catResults) => {
+  if (err) {
+    console.log('FIND ERROR! 😔');
   }
 
   else {
-    console.log('YES! Saved Nala.');
+    console.log('All the cats!!');
+
+    catResults.forEach((oneCat) => {
+      console.log('--> cat: ' + oneCat.name);
+    });
   }
 });
+
+
+// db.cats.find(
+//   { name: 'Nala' },
+//   { name: 1, _id: 0 }
+// )
+Cat.find(
+  { name: 'Nala' },        // 1st argument -> criteria object
+
+  { name: 1, _id: 0 },     // 2nd argument -> projection object
+
+  (err, nalaResults) => {  // 3rd argument -> callback that runs when finished
+    if (err) {
+      console.log('Nala find error 😡');
+    }
+
+    else {
+      console.log('All the NALAs');
+
+      nalaResults.forEach((oneNala) => {
+        console.log('➥ cat: ' + oneNala.name);
+      });
+    }
+  }
+);
+
+
+// Cat.findById()            R of CRUD
+// Cat.findByIdAndUpdate()   U of CRUD
+// Cat.findByIdAndRemove()   D of CRUD
